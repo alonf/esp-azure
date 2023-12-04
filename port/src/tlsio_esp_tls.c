@@ -220,7 +220,7 @@ static CONCRETE_IO_HANDLE tlsio_esp_tls_create(void* io_create_parameters)
                 TLSIO_OPTION_BIT_x509_RSA_CERT | TLSIO_OPTION_BIT_x509_ECC_CERT);
                 // result->esp_tls_handle = (esp_tls_t*)calloc(1, sizeof(esp_tls_t));
                 //ToDo: esp-idf v5.1.1 compilation problem of un-complete type sizeof(esp_tls_t), below is a workaround
-                result->esp_tls_handle = (esp_tls_t*)calloc(1, 2*1024);
+                result->esp_tls_handle = esp_tls_init();
                 if (result->esp_tls_handle == NULL)
                 {
                     /* Codes_SRS_TLSIO_30_011: [ If any resource allocation fails, tlsio_create shall return NULL. ]*/
