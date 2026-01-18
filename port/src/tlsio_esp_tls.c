@@ -1,3 +1,5 @@
+//Alon:  esp-idf v5.1.1 compilation problem fixed!
+
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -217,6 +219,8 @@ static CONCRETE_IO_HANDLE tlsio_esp_tls_create(void* io_create_parameters)
                 result->pending_transmission_list = NULL;
                 tlsio_options_initialize(&result->options, TLSIO_OPTION_BIT_TRUSTED_CERTS |
                 TLSIO_OPTION_BIT_x509_RSA_CERT | TLSIO_OPTION_BIT_x509_ECC_CERT);
+                // result->esp_tls_handle = (esp_tls_t*)calloc(1, sizeof(esp_tls_t));
+                // ToDo: esp-idf v5.1.1 compilation problem of un-complete type sizeof(esp_tls_t), below is a workaround
                 result->esp_tls_handle = esp_tls_init();
                 if (result->esp_tls_handle == NULL)
                 {
