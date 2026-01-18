@@ -1,10 +1,12 @@
+[2:05 AM] Alon Fliess
+    
+
 #
 # Component Makefile
 #
- 
 # Component configuration in preprocessor defines
-CFLAGS += -DUSE_LWIP_SOCKET_FOR_AZURE_IOT
-
+# CFLAGS += -DUSE_LWIP_SOCKET_FOR_AZURE_IOT
+#CFLAGS += -Duse_prov_client:BOOL=ON
 COMPONENT_ADD_INCLUDEDIRS := \
 azure-iot-sdk-c/c-utility/inc \
 azure-iot-sdk-c/c-utility/deps/azure-macro-utils-c/inc \
@@ -17,13 +19,11 @@ azure-iot-sdk-c/deps/parson \
 azure-iot-sdk-c/provisioning_client/inc \
 azure-iot-sdk-c/provisioning_client/adapters \
 azure-iot-sdk-c/provisioning_client/deps/utpm/inc \
-
 COMPONENT_PRIV_INCLUDEDIRS := \
 port/inc \
 azure-iot-sdk-c/c-utility/pal/inc \
 azure-iot-sdk-c/c-utility/pal/freertos \
 azure-iot-sdk-c/c-utility/pal/generic \
-
 ifndef CONFIG_TARGET_PLATFORM_ESP8266
 COMPONENT_ADD_INCLUDEDIRS += azure-iot-sdk-c/certs
 endif
@@ -92,20 +92,20 @@ azure-iot-sdk-c/umqtt/src/mqtt_message.o \
 \
 azure-iot-sdk-c/deps/parson/parson.o \
 \
-azure-iot-sdk-c/serializer/src/codefirst.o \
-azure-iot-sdk-c/serializer/src/agenttypesystem.o \
-azure-iot-sdk-c/serializer/src/commanddecoder.o \
-azure-iot-sdk-c/serializer/src/datamarshaller.o \
-azure-iot-sdk-c/serializer/src/datapublisher.o \
-azure-iot-sdk-c/serializer/src/dataserializer.o \
-azure-iot-sdk-c/serializer/src/iotdevice.o \
-azure-iot-sdk-c/serializer/src/jsondecoder.o \
-azure-iot-sdk-c/serializer/src/jsonencoder.o \
-azure-iot-sdk-c/serializer/src/methodreturn.o \
-azure-iot-sdk-c/serializer/src/multitree.o \
-azure-iot-sdk-c/serializer/src/schema.o \
-azure-iot-sdk-c/serializer/src/schemalib.o \
-azure-iot-sdk-c/serializer/src/schemaserializer.o \
+# azure-iot-sdk-c/serializer/src/codefirst.o \
+# azure-iot-sdk-c/serializer/src/agenttypesystem.o \
+# azure-iot-sdk-c/serializer/src/commanddecoder.o \
+# azure-iot-sdk-c/serializer/src/datamarshaller.o \
+# azure-iot-sdk-c/serializer/src/datapublisher.o \
+# azure-iot-sdk-c/serializer/src/dataserializer.o \
+# azure-iot-sdk-c/serializer/src/iotdevice.o \
+# azure-iot-sdk-c/serializer/src/jsondecoder.o \
+# azure-iot-sdk-c/serializer/src/jsonencoder.o \
+# azure-iot-sdk-c/serializer/src/methodreturn.o \
+# azure-iot-sdk-c/serializer/src/multitree.o \
+# azure-iot-sdk-c/serializer/src/schema.o \
+# azure-iot-sdk-c/serializer/src/schemalib.o \
+# azure-iot-sdk-c/serializer/src/schemaserializer.o \
 \
 \
 azure-iot-sdk-c/provisioning_client/src/prov_device_client.o \
@@ -116,28 +116,25 @@ azure-iot-sdk-c/provisioning_client/src/prov_device_ll_client.o \
 azure-iot-sdk-c/provisioning_client/src/iothub_security_factory.o \
 azure-iot-sdk-c/provisioning_client/adapters/hsm_client_data.o \
 azure-iot-sdk-c/provisioning_client/adapters/hsm_client_tpm.o \
+azure-iot-sdk-c/provisioning_client/adapters/hsm_client_key.o /* Added By Alon Fliess */ \
 azure-iot-sdk-c/provisioning_client/src/prov_auth_client.o \
 azure-iot-sdk-c/provisioning_client/deps/utpm/src/tpm_codec.o \
 azure-iot-sdk-c/provisioning_client/deps/utpm/src/Marshal.o \
 azure-iot-sdk-c/provisioning_client/deps/utpm/src/tpm_comm_emulator.o \
 azure-iot-sdk-c/provisioning_client/deps/utpm/src/Memory.o \
-azure-iot-sdk-c/provisioning_client/deps/utpm/src/tpm_socket_comm.o \
+#azure-iot-sdk-c/provisioning_client/deps/utpm/src/tpm_socket_comm.o \
 azure-iot-sdk-c/iothub_client/src/iothub.o \
 azure-iot-sdk-c/c-utility/src/http_proxy_io.o \
 azure-iot-sdk-c/c-utility/src/azure_base32.o \
-
 ifdef CONFIG_DEVICE_COMMON_NAME
 COMPONENT_OBJS += azure-iot-sdk-c/provisioning_client/src/iothub_auth_client.o
 endif
-
 ifdef CONFIG_TARGET_PLATFORM_ESP8266
 COMPONENT_OBJS += port/src/certs.o
 endif
-
 ifndef CONFIG_TARGET_PLATFORM_ESP8266
 COMPONENT_OBJS += azure-iot-sdk-c/certs/certs.o
 endif
-
 COMPONENT_SRCDIRS := \
 port/src \
 azure-iot-sdk-c/c-utility/pal \
@@ -155,15 +152,14 @@ azure-iot-sdk-c/iothub_client_amqp_transport \
 azure-iot-sdk-c/provisioning_client/src \
 azure-iot-sdk-c/provisioning_client/adapters \
 azure-iot-sdk-c/provisioning_client/deps/utpm/src \
-
 ifndef CONFIG_TARGET_PLATFORM_ESP8266
 COMPONENT_SRCDIRS += azure-iot-sdk-c/certs
 endif
-
-CFLAGS += -Wno-unused-function -Wno-missing-braces -Wno-missing-field-initializers -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN -Wno-unknown-pragmas
-
+#CFLAGS += -Wno-unused-function -Wno-missing-braces -Wno-missing-field-initializers -DHSM_TYPE_X509 -DHSM_TYPE_SAS_TOKEN
+CPPFLAGS += -Wno-unused-function -Wno-missing-braces -Wno-missing-field-initializers  -DHSM_TYPE_SAS_TOKEN -DUSE_PROV_CLIENT -DHSM_TYPE_SYMM_KEY
 ifdef CONFIG_DEVICE_COMMON_NAME
-CFLAGS += -DUSE_PROV_MODULE
+# CFLAGS += -DUSE_PROV_MODULE
 endif
+azure-iot-sdk-c/iothub_client/src/iothubtransport_mqtt_common.o: CPPFLAGS+=-Wno-maybe-uninitialized
 
-azure-iot-sdk-c/iothub_client/src/iothubtransport_mqtt_common.o: CFLAGS+=-Wno-maybe-uninitialized
+
