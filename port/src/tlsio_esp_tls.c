@@ -21,6 +21,8 @@
 #include "azure_c_shared_utility/tlsio_options.h"
 
 #include "esp_tls.h"
+#include "esp_crt_bundle.h"
+#include "certs.h"
 
 typedef struct
 {
@@ -124,7 +126,7 @@ static void internal_close(TLS_IO_INSTANCE* tls_io_instance)
     /* Codes_SRS_TLSIO_30_006: [ The phrase "enter TLSIO_STATE_EXT_CLOSED" means the adapter shall forcibly close any existing connections then call the on_io_close_complete function and pass the on_io_close_complete_context that was supplied in tlsio_close_async. ]*/
     /* Codes_SRS_TLSIO_30_051: [ On success, if the underlying TLS does not support asynchronous closing, then the adapter shall enter TLSIO_STATE_EXT_CLOSED immediately after entering TLSIO_STATE_EX_CLOSING. ]*/
 
-    esp_tls_conn_delete(tls_io_instance->esp_tls_handle);
+    esp_tls_conn_destroy(tls_io_instance->esp_tls_handle);
     while (process_and_destroy_head_message(tls_io_instance, IO_SEND_CANCELLED));
     // singlylinkedlist_destroy gets called in the main destroy
 
@@ -216,7 +218,7 @@ static CONCRETE_IO_HANDLE tlsio_esp_tls_create(void* io_create_parameters)
                 result->pending_transmission_list = NULL;
                 tlsio_options_initialize(&result->options, TLSIO_OPTION_BIT_TRUSTED_CERTS |
                 TLSIO_OPTION_BIT_x509_RSA_CERT | TLSIO_OPTION_BIT_x509_ECC_CERT);
-                result->esp_tls_handle = calloc(1, sizeof(esp_tls_t));
+                result->esp_tls_handle = esp_tls_init();
                 if (result->esp_tls_handle == NULL)
                 {
                     /* Codes_SRS_TLSIO_30_011: [ If any resource allocation fails, tlsio_create shall return NULL. ]*/
@@ -321,9 +323,14 @@ static int tlsio_esp_tls_open_async(CONCRETE_IO_HANDLE tls_io,
                             tls_io_instance->esp_tls_cfg.clientkey_pem_buf = (unsigned char *)tls_io_instance->options.x509_key;
                             tls_io_instance->esp_tls_cfg.clientkey_pem_bytes = strlen(tls_io_instance->options.x509_key) + 1;
                         }
+                        tls_io_instance->esp_tls_cfg.crt_bundle_attach = esp_crt_bundle_attach;
                         if (tls_io_instance->options.trusted_certs != NULL) {
                             tls_io_instance->esp_tls_cfg.cacert_pem_buf = (unsigned char *)tls_io_instance->options.trusted_certs;
                             tls_io_instance->esp_tls_cfg.cacert_pem_bytes = strlen(tls_io_instance->options.trusted_certs) + 1;
+                        } else {
+                            LogInfo("No trusted CA provided; using built-in Azure certs");
+                            tls_io_instance->esp_tls_cfg.cacert_pem_buf = (unsigned char *)certificates;
+                            tls_io_instance->esp_tls_cfg.cacert_pem_bytes = strlen(certificates) + 1;
                         }
 
                         tls_io_instance->tlsio_state = TLSIO_STATE_INIT;
@@ -485,7 +492,9 @@ static void tlsio_esp_tls_dowork(CONCRETE_IO_HANDLE tls_io)
                 tls_io_instance->tlsio_state = TLSIO_STATE_OPEN;
                 tls_io_instance->on_open_complete(tls_io_instance->on_open_complete_context, IO_OPEN_OK);
             } else if (result == -1) {
+                LogError("esp_tls_conn_new_async failed, errno=%d", errno);
                 tls_io_instance->tlsio_state = TLSIO_STATE_ERROR;
+                tls_io_instance->on_open_complete(tls_io_instance->on_open_complete_context, IO_OPEN_ERROR);
             }
             }
             break;
